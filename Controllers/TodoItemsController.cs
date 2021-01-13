@@ -7,11 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotnetCoreApi.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DotnetCoreApi.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize]
+    [EnableCors("any")]
     public class TodoItemsController : ControllerBase
     {
         private readonly TodoContext _context;
@@ -25,6 +29,7 @@ namespace DotnetCoreApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItems>>> GetTodoItems()
         {
+            var usreName = Response.HttpContext.User.Identity.Name;
             return await _context.TodoItems.ToListAsync();
         }
 
@@ -32,6 +37,7 @@ namespace DotnetCoreApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TodoItems>> GetTodoItemsById(long id)
         {
+           
             var todoItems = await _context.TodoItems.FindAsync(id);
 
             if (todoItems == null)
