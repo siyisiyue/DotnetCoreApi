@@ -9,5 +9,7 @@ namespace DotnetCoreApi.Models
         }
         public DbSet<TodoItems> TodoItems { get; set; }
         public DbSet<UserInfo> UserInfo { get; set; }
+
+        public DbSet<Goods> Goods { get; set; }
     }
 }
