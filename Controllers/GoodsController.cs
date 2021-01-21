@@ -64,5 +64,13 @@ namespace DotnetCoreApi.Controllers
             return Ok(lst);
         }
 
+        public async Task<ObjectResult> GetDetails( int id)
+        {
+           
+            var goods = await _context.Goods.Where(x => x.Id==id).FirstOrDefaultAsync();
+           
+            return Ok(goods);
+        }
+
     }
 }
