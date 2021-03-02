@@ -38,36 +38,70 @@ namespace DotnetCoreApi.Controllers
             TableHead th = new TableHead();
             List<SelectDto> keys = new List<SelectDto>();
 
-            switch (tableName)
+            var relation = _context.Relation.Where(x => x.TableName == tableName).FirstOrDefault();
+            if (relation == null)
             {
-                case "C-2-55水泥混凝土面层检验记录表":
-                    GetObjKeys(new CementConcrete(), keys);
-                    break;
-                case "C-2-74钻(挖)孔灌注桩、地下连续墙钢筋安装检验记录表":
-                    GetObjKeys(new RebarSetting(), keys);
-                    break;
-                default:
-                    break;
+                return Ok(new { code = 1, msg = "表名不存在，请检查对应表" });
             }
+            
+            
+            var typeName = (relation.DtoNameSpace.IsNullOrEmpty() ? "DotnetCoreApi.Models" : relation.DtoNameSpace) +"."+ relation.TableDtoName;
 
-            return Ok(keys);
+            //switch (tableName)
+            //{
+            //    case "C-2-55水泥混凝土面层检验记录表":
+            //        GetObjKeys(new CementConcrete(), keys);
+            //        break;
+            //    case "C-2-74钻(挖)孔灌注桩、地下连续墙钢筋安装检验记录表":
+            //        GetObjKeys(new RebarSetting(), keys);
+            //        break;
+            //    default:
+            //        break;
+            //}
+            GetObjKeys(typeName, keys);
+            return Ok(new { code = 0, msg = "", data = keys });
+        }
+        /// <summary>
+        /// 通过字符串获取类名
+        /// </summary>
+        /// <param name="TypeName"></param>
+        /// <returns></returns>
+        private Type GetType(string TypeName)
+        {
+            return Type.GetType(TypeName);
         }
 
-
-        private void GetObjKeys<T>(T obj, List<SelectDto> keys)
+        /// <summary>
+        /// 获取所有的table表名称
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public ObjectResult GetAllTableName()
         {
-            Type t = obj.GetType();
+            var lst = _context.Relation.Select(x => x.TableName).ToList();
+            return Ok(new { code = 0, msg = "", data = lst });
+        }
+
+        /// <summary>
+        /// 通用方法：通过表实例返回对应的key用于绑定
+        /// </summary>
+        /// <param name="TypeName"></param>
+        /// <param name="keys"></param>
+        private void GetObjKeys(string TypeName, List<SelectDto> keys)
+        {
+            //Type t = obj.GetType();
+            Type t = Type.GetType(TypeName);
             foreach (PropertyInfo pi in t.GetProperties())
             {
                 var name = pi.Name;//获得属性的名字,后面就可以根据名字判断来进行些自己想要的操作
-                var value = pi.GetValue(obj, null);//用pi.GetValue获得值
+               // var value = pi.GetValue(obj, null);//用pi.GetValue获得值
                 var v = (DescriptionAttribute[])pi.GetCustomAttributes(typeof(DescriptionAttribute), false);
                 var descriptionName = v.Length > 0 ? v[0].Description : "";
                 if (descriptionName != "")
                 {
                     keys.Add(new SelectDto() { label = descriptionName, value = name });
                 }
-                var type = value?.GetType() ?? typeof(object);//获得属性的类型
+               // var type = value?.GetType() ?? typeof(object);//获得属性的类型
             }
         }
 
@@ -108,7 +142,11 @@ namespace DotnetCoreApi.Controllers
 
             return Ok(GetPostion(TableName));
         }
-
+        /// <summary>
+        /// 根据表名获取所有的坐标
+        /// </summary>
+        /// <param name="TableName"></param>
+        /// <returns></returns>
         private List<PostionTemp> GetPostion(string TableName)
         {
             var lst = _context.PostionTemp.Where(x => x.TableName == TableName).ToList();
@@ -130,6 +168,11 @@ namespace DotnetCoreApi.Controllers
             return 0;
         }
 
+        /// <summary>
+        /// 通过ID删除坐标点
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> DeletePostion(EntityDto dto)
         {
@@ -143,30 +186,46 @@ namespace DotnetCoreApi.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
+        /// <summary>
+        /// 通用查询接口
+        /// </summary>
+        /// <param name="id">表单ID</param>
+        /// <param name="tableName">表名</param>
+        /// <returns></returns>
         [HttpGet]
-        public ObjectResult GetData(int id, string tableName)
+        public object GetData(int id, string tableName)
         {
             GetTableDataDto entity = new GetTableDataDto() { Id = id, TableName = tableName };
-            try
-            {
-                switch (entity.TableName)
-                {
-                    case "C-2-55水泥混凝土面层检验记录表":
-                        return GetTableDto<CementConcrete, ShuiNiHunLingTu>(entity);
-                    // return GetCementConcrete(entity);
-                    case "C-2-74钻(挖)孔灌注桩、地下连续墙钢筋安装检验记录表":
-                        return GetTableDto<RebarSetting, GangJingAnZhuang>(entity);
-                    //return GetRebarSetting(entity);
-                    default:
-                        return Ok(new { code = 1, msg = "没有找到对应的表" });
-                }
-            }
-            catch (Exception ex)
-            {
 
-                return Ok(new { code = 1, msg = ex.Message });
-            }
+            var rel = _context.Relation.Where(x => x.TableName == tableName).FirstOrDefault();
+
+            var dataTypeName = (rel.TableNamespace.IsNullOrEmpty() ? "DotnetCoreApi.Models" : rel.TableNamespace) + "." + rel.TableDtoDataName;
+            var dtoTypeName = (rel.DtoNameSpace.IsNullOrEmpty() ? "DotnetCoreApi.Models" : rel.DtoNameSpace) + "." + rel.TableDtoName;
+            Type t = Type.GetType(dtoTypeName);
+            Type t2 = Type.GetType(dataTypeName);
+            Type[] typeArgs = { t, t2 };
+            var result = this.GetType().GetMethod("GetTableDto").MakeGenericMethod(typeArgs).Invoke(this, new object[] { entity });
+
+            return result;
+            //try
+            //{
+            //    switch (entity.TableName)
+            //    {
+            //        case "C-2-55水泥混凝土面层检验记录表":
+            //            return GetTableDto<CementConcrete, ShuiNiHunLingTu>(entity);
+            //        // return GetCementConcrete(entity);
+            //        case "C-2-74钻(挖)孔灌注桩、地下连续墙钢筋安装检验记录表":
+            //            return GetTableDto<RebarSetting, GangJingAnZhuang>(entity);
+            //        //return GetRebarSetting(entity);
+            //        default:
+            //            return Ok(new { code = 1, msg = "没有找到对应的表" });
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+
+            //    return Ok(new { code = 1, msg = ex.Message });
+            //}
         }
 
         private ObjectResult GetCementConcrete(GetTableDataDto dto)
@@ -223,7 +282,7 @@ namespace DotnetCoreApi.Controllers
         /// <typeparam name="F">dto类下的Data类</typeparam>
         /// <param name="dto"></param>
         /// <returns></returns>
-        private ObjectResult GetTableDto<T, F>(GetTableDataDto dto) where T : class, BaseData<T, F>, new() where F : class, BaseParent, new()
+        public ObjectResult GetTableDto<T, F>(GetTableDataDto dto) where T : class, BaseData<T, F>, new() where F : class, BaseParent, new()
         {
             TableHead th = _context.TableHead.Where(x => x.Id == dto.Id).FirstOrDefault();
             if (th == null)
@@ -261,7 +320,11 @@ namespace DotnetCoreApi.Controllers
             return Ok(new { code = 0, msg = "", data = lst });
         }
 
-
+        /// <summary>
+        /// 通用保存接口
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost]
         public ActionResult Save(TableSaveDto dto)
         {

@@ -11,10 +11,18 @@ namespace DotnetCoreApi.Models
         [Key]
         public int Id { get; set; }
         /// <summary>
+        /// 表单类的命名空间
+        /// </summary>
+        public string TableNamespace { get; set; }
+        /// <summary>
         /// 表单名
         /// </summary>
         [Required]
         public string TableName { get; set; }
+        /// <summary>
+        /// Dto的命名空间
+        /// </summary>
+        public string DtoNameSpace { get; set; }
         /// <summary>
         /// Dto类名称
         /// </summary>
