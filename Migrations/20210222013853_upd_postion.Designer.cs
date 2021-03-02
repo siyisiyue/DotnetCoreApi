@@ -4,14 +4,16 @@ using DotnetCoreApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DotnetCoreApi.Migrations
 {
     [DbContext(typeof(TodoContext))]
-    partial class TodoContextModelSnapshot : ModelSnapshot
+    [Migration("20210222013853_upd_postion")]
+    partial class upd_postion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -206,33 +208,6 @@ namespace DotnetCoreApi.Migrations
                     b.ToTable("PostionTemp");
                 });
 
-            modelBuilder.Entity("DotnetCoreApi.Models.Relation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<int>("InstanceCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TableDtoDataName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TableDtoName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TableName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Relation");
-                });
-
             modelBuilder.Entity("DotnetCoreApi.Models.ShuiNiHunLingTu", b =>
                 {
                     b.Property<int>("Id")
@@ -252,6 +227,9 @@ namespace DotnetCoreApi.Migrations
                     b.Property<string>("DuanBanLv")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("GaoChaPc")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("GaoChaSc")
                         .HasColumnType("nvarchar(max)");
 
@@ -261,19 +239,16 @@ namespace DotnetCoreApi.Migrations
                     b.Property<string>("Mark")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Other1")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Other2")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Other3")
+                    b.Property<string>("ShenDuPc")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ShenDuSc")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ShenDuSj")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShunZhiDuPc")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ShunZhiDuSc")

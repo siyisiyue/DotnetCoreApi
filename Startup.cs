@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AutoMapper;
 
 
 namespace DotnetCoreApi
@@ -63,6 +64,8 @@ namespace DotnetCoreApi
 
             services.AddScoped<IAuthenticateService, TokenAuthenticationService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddAutoMapper(cfg =>
+            { cfg.AddProfile<MapperConfig>(); });
             //#endregion
         }
 

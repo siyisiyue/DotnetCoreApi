@@ -4,14 +4,16 @@ using DotnetCoreApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DotnetCoreApi.Migrations
 {
     [DbContext(typeof(TodoContext))]
-    partial class TodoContextModelSnapshot : ModelSnapshot
+    [Migration("20210206074005_spread_table")]
+    partial class spread_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,57 +182,21 @@ namespace DotnetCoreApi.Migrations
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
-                    b.Property<int>("Col")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ColCount")
-                        .HasColumnType("int");
-
                     b.Property<string>("FieldName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Row")
+                    b.Property<int>("PostionX")
                         .HasColumnType("int");
 
-                    b.Property<int>("RowCount")
+                    b.Property<int>("PostionY")
                         .HasColumnType("int");
 
                     b.Property<string>("TableName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("PostionTemp");
-                });
-
-            modelBuilder.Entity("DotnetCoreApi.Models.Relation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<int>("InstanceCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TableDtoDataName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TableDtoName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TableName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Relation");
                 });
 
             modelBuilder.Entity("DotnetCoreApi.Models.ShuiNiHunLingTu", b =>
@@ -252,6 +218,9 @@ namespace DotnetCoreApi.Migrations
                     b.Property<string>("DuanBanLv")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("GaoChaPc")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("GaoChaSc")
                         .HasColumnType("nvarchar(max)");
 
@@ -261,19 +230,16 @@ namespace DotnetCoreApi.Migrations
                     b.Property<string>("Mark")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Other1")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Other2")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Other3")
+                    b.Property<string>("ShenDuPc")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ShenDuSc")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ShenDuSj")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShunZhiDuPc")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ShunZhiDuSc")
