@@ -18,7 +18,7 @@ namespace DotnetCoreApi.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     [EnableCors("any")]
     public class TableController : Controller
     {
@@ -318,8 +318,15 @@ namespace DotnetCoreApi.Controllers
         [HttpGet]
         public ObjectResult GetAllData()
         {
+            var rel = _context.Relation.Select(x=>x.TableName).ToList();
             var lst = _context.TableHead.Select(x => new { x.Id, x.TableName, x.Name }).ToList();
-            return Ok(new { code = 0, msg = "", data = lst });
+            List<object> data = new List<object>();
+            foreach (var item in rel)
+            {
+                data.Add(new { type = item, list = lst.Where(x => x.TableName == item).ToList() });
+            }
+
+            return Ok(new { code = 0, msg = "", data = data });
         }
 
         /// <summary>
