@@ -195,10 +195,12 @@ namespace DotnetCoreApi.Controllers
         [HttpGet]
         public object GetData(int id, string tableName)
         {
-            GetTableDataDto entity = new GetTableDataDto() { Id = id, TableName = tableName };
-
             var rel = _context.Relation.Where(x => x.TableName == tableName).FirstOrDefault();
-
+            if (rel==null)
+            {
+                return Ok(new { code = 1, msg = "表单不存在" });
+            }
+            GetTableDataDto entity = new GetTableDataDto() { Id = id, TableName = tableName, InstanceCount =rel.InstanceCount };
             var dataTypeName = (rel.TableNamespace.IsNullOrEmpty() ? "DotnetCoreApi.Models" : rel.TableNamespace) + "." + rel.TableDtoDataName;
             var dtoTypeName = (rel.DtoNameSpace.IsNullOrEmpty() ? "DotnetCoreApi.Models" : rel.DtoNameSpace) + "." + rel.TableDtoName;
             Type t = Type.GetType(dtoTypeName);
@@ -290,7 +292,7 @@ namespace DotnetCoreApi.Controllers
                 T entity = new T() { TableName = dto.TableName };
 
                 List<F> lst = new List<F>();
-                for (int i = 0; i < GetDataLength(dto.TableName, "Data"); i++)
+                for (int i = 0; i < dto.InstanceCount; i++)
                 {
                     F s = new F();
                     lst.Add(s);
@@ -328,31 +330,41 @@ namespace DotnetCoreApi.Controllers
         [HttpPost]
         public ActionResult Save(TableSaveDto dto)
         {
-
             try
             {
-                switch (dto.tableName)
+                var rel = _context.Relation.Where(x => x.TableName == dto.tableName).FirstOrDefault();
+                if (rel == null)
                 {
-                    case "C-2-55水泥混凝土面层检验记录表":
-                        Save<CementConcrete, ShuiNiHunLingTu>(dto.Data);
-                        //SaveCement(JsonConvert.DeserializeObject<CementConcrete>(dto.Data));
-                        //CementConcrete obj = JsonConvert.DeserializeObject<CementConcrete>(dto.Data);
-                        //var elm = _mapper.Map<TableHead>(obj);
-                        //var o = SaveObject<TableHead>(elm);
-                        //var lst = obj.Data;
-                        //foreach (var item in lst)
-                        //{
-                        //    item.TableHeadId = o.Id;
-                        //    SaveObject<ShuiNiHunLingTu>(item);
-                        //}
-                        break;
-                    case "C-2-74钻(挖)孔灌注桩、地下连续墙钢筋安装检验记录表":
-                        Save<RebarSetting, GangJingAnZhuang>(dto.Data);
-                        //SaveRebar(JsonConvert.DeserializeObject<RebarSetting>(dto.Data));
-                        break;
-                    default:
-                        break;
+                    return Ok(new { code = 1, msg = "表单不存在" });
                 }
+                var dataTypeName = (rel.TableNamespace.IsNullOrEmpty() ? "DotnetCoreApi.Models" : rel.TableNamespace) + "." + rel.TableDtoDataName;
+                var dtoTypeName = (rel.DtoNameSpace.IsNullOrEmpty() ? "DotnetCoreApi.Models" : rel.DtoNameSpace) + "." + rel.TableDtoName;
+                Type t = Type.GetType(dtoTypeName);
+                Type t2 = Type.GetType(dataTypeName);
+                Type[] typeArgs = { t, t2 };
+                this.GetType().GetMethod("SaveTable").MakeGenericMethod(typeArgs).Invoke(this, new object[] { dto.Data });
+                //switch (dto.tableName)
+                //{
+                //    case "C-2-55水泥混凝土面层检验记录表":
+                //        SaveTable<CementConcrete, ShuiNiHunLingTu>(dto.Data);
+                //        //SaveCement(JsonConvert.DeserializeObject<CementConcrete>(dto.Data));
+                //        //CementConcrete obj = JsonConvert.DeserializeObject<CementConcrete>(dto.Data);
+                //        //var elm = _mapper.Map<TableHead>(obj);
+                //        //var o = SaveObject<TableHead>(elm);
+                //        //var lst = obj.Data;
+                //        //foreach (var item in lst)
+                //        //{
+                //        //    item.TableHeadId = o.Id;
+                //        //    SaveObject<ShuiNiHunLingTu>(item);
+                //        //}
+                //        break;
+                //    case "C-2-74钻(挖)孔灌注桩、地下连续墙钢筋安装检验记录表":
+                //        SaveTable<RebarSetting, GangJingAnZhuang>(dto.Data);
+                //        //SaveRebar(JsonConvert.DeserializeObject<RebarSetting>(dto.Data));
+                //        break;
+                //    default:
+                //        break;
+                //}
 
                 return Ok(new { code = 0, msg = "" });
             }
@@ -369,7 +381,7 @@ namespace DotnetCoreApi.Controllers
         /// <typeparam name="T">表dto</typeparam>
         /// <typeparam name="F">表dto里的数据类型</typeparam>
         /// <param name="json">表dto的json字符串</param>
-        private void Save<T, F>(string json) where T : class, BaseData<T, F> where F : class, BaseParent
+        public void SaveTable<T, F>(string json) where T : class, BaseData<T, F> where F : class, BaseParent
         {
             T obj = JsonConvert.DeserializeObject<T>(json);
             var th = _mapper.Map<TableHead>(obj);

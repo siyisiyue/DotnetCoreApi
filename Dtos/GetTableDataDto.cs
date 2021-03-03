@@ -9,5 +9,7 @@ namespace DotnetCoreApi.Dtos
     {
         public int Id { get; set; }
         public string TableName { get; set; }
+
+        public int InstanceCount { get; set; }
     }
 }
